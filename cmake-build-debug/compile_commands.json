@@ -6,6 +6,11 @@
 },
 {
   "directory": "C:/Users/Valentin/Documents/GitHub/reversi/cmake-build-debug",
+  "command": "C:\\PROGRA~1\\JETBRA~1\\CLION2~1.2\\bin\\mingw\\bin\\gcc.exe -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -IC:/Users/Valentin/Documents/GitHub/reversi/cmake-build-debug/_deps/raylib-src/src -IC:/Users/Valentin/Documents/GitHub/reversi/cmake-build-debug/_deps/raylib-src/src/external/glfw/include -g -o CMakeFiles\\reversi.dir\\container.c.obj -c C:\\Users\\Valentin\\Documents\\GitHub\\reversi\\container.c",
+  "file": "C:\\Users\\Valentin\\Documents\\GitHub\\reversi\\container.c"
+},
+{
+  "directory": "C:/Users/Valentin/Documents/GitHub/reversi/cmake-build-debug",
   "command": "C:\\PROGRA~1\\JETBRA~1\\CLION2~1.2\\bin\\mingw\\bin\\gcc.exe -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP -D_CRT_SECURE_NO_WARNINGS -IC:/Users/Valentin/Documents/GitHub/reversi/cmake-build-debug/_deps/raylib-src/src -isystem C:/Users/Valentin/Documents/GitHub/reversi/cmake-build-debug/_deps/raylib-src/src/external/glfw/include -fno-strict-aliasing -Werror=implicit-function-declaration -Werror=pointer-arith  -g -std=gnu99 -o _deps\\raylib-build\\raylib\\CMakeFiles\\raylib.dir\\rcore.c.obj -c C:\\Users\\Valentin\\Documents\\GitHub\\reversi\\cmake-build-debug\\_deps\\raylib-src\\src\\rcore.c",
   "file": "C:\\Users\\Valentin\\Documents\\GitHub\\reversi\\cmake-build-debug\\_deps\\raylib-src\\src\\rcore.c"
 },
