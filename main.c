@@ -23,6 +23,7 @@ int main()
         render_pieces();
         mark_playable_positions();
         make_next_move();
+        render_score();
         EndDrawing();
 
         if (game_ended){

@@ -3,8 +3,8 @@
 //
 
 #include "container.h"
-#define WHITE_PLAYER 10
-#define BLACK_PLAYER 11
+#define WHITE_PLAYER 0
+#define BLACK_PLAYER 1
 #define EMPTY        2
 #define PLAYABLE     3
 #define FALSE        0
@@ -28,6 +28,11 @@ struct Position
 //Inicializacio del tablero
 void init_game()
 {
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            board[i][j] = EMPTY;
+        }
+    }
     board[3][3] = BLACK_PLAYER;
     board[4][4] = BLACK_PLAYER;
     board[3][4] = WHITE_PLAYER;
@@ -40,7 +45,7 @@ void init_game()
 void render_board()
 {
     int cellLength = 200;
-    int x = 750;
+    int x = 700; //750
     int y = 100;
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -57,7 +62,7 @@ void render_board()
 void render_pieces()
 {
     int cellLength = 200;
-    int x = 850;
+    int x = 800;    //850
     int y = 200;
     render_possible_moves();
     for (int i = 0; i < 8; i++) {
@@ -90,13 +95,13 @@ void render_possible_moves()
 
 int is_playable( int i, int j )
 {
-    /*if ( !is_valid_position( i, j ) )
+    if ( !is_valid_position( i, j ) )
         return FALSE;
     if ( board[i][j] != EMPTY )
-        return FALSE;*/
+        return FALSE;
 
     int playable = FALSE;
-    int opposing_player = (( current_player + 1 ) % 2)+10;
+    int opposing_player = (current_player + 1 ) % 2;
 
     // Test UL diagonal
     int i_it = i-1, j_it = j-1;
@@ -206,7 +211,8 @@ int is_valid_position( int i, int j )
 int distance( int i1, int j1, int i2, int j2 )
 {
     int di = abs( i1 - i2 ), dj = abs( j1 - j2 );
-    if ( di > 0 ) return di;
+    if ( di > 0 )
+        return di;
     return dj;
 }
 
@@ -216,18 +222,20 @@ void make_next_move()
     if (is_valid_position(position.x,position.y) && board [position.x][position.y] == PLAYABLE){
         board [position.x][position.y] = current_player;
         score[current_player]++;
+        capture_pieces( position.x, position.y);
         if (test)
             change_current_player();
         test = false;
         position.x = -1;
         position.y = -1;
-    }
+    } else
+        wrong_move = TRUE;
 }
 
 char get_mouse_position ()
 {
     int cellLength = 200;   //100
-    int x = 750;    //750   //850
+    int x = 700;    //750   //850
     int y = 100;    //100   //200
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
         for (int i = x; i < cellLength * 8 + x; i += cellLength) {
@@ -248,13 +256,11 @@ char get_mouse_position ()
         }
         test = true;
     }
-    DrawText(TextFormat("Cordenada x: %i", position.x), 350, 100, 50, BLACK);
-    DrawText(TextFormat("Cordenada y: %i", position.y), 350, 150, 50, BLACK);
 }
 
 void change_current_player( )
 {
-    current_player = (( current_player + 1 ) % 2)+10;
+    current_player = (current_player + 1 ) % 2;
 }
 
 void mark_playable_positions( )
@@ -273,4 +279,126 @@ void mark_playable_positions( )
             }
         }
     }
+}
+
+void capture_pieces( int i, int j )
+{
+    int opposing_player = (current_player + 1) % 2;
+    int i_it, j_it;
+
+    // Capture UL diagonal
+    if ( playable_direction[i][j][0] )
+    {
+        i_it = i-1, j_it = j-1;
+        while ( board[i_it][j_it] == opposing_player )
+        {
+            board[i_it][j_it] = current_player;
+            score[current_player]++;
+            score[opposing_player]--;
+            i_it -= 1;
+            j_it -= 1;
+        }
+    }
+
+    // Capture UP path
+    if ( playable_direction[i][j][1] )
+    {
+        i_it = i-1, j_it = j;
+        while ( board[i_it][j_it] == opposing_player )
+        {
+            board[i_it][j_it] = current_player;
+            score[current_player]++;
+            score[opposing_player]--;
+            i_it -= 1;
+        }
+    }
+
+    // Capture UR diagonal
+    if ( playable_direction[i][j][2] )
+    {
+        i_it = i-1, j_it = j+1;
+        while ( board[i_it][j_it] == opposing_player )
+        {
+            board[i_it][j_it] = current_player;
+            score[current_player]++;
+            score[opposing_player]--;
+            i_it -= 1;
+            j_it += 1;
+        }
+    }
+
+    // Capture LEFT path
+    if ( playable_direction[i][j][3] )
+    {
+        i_it = i, j_it = j-1;
+        while ( board[i_it][j_it] == opposing_player )
+        {
+            board[i_it][j_it] = current_player;
+            score[current_player]++;
+            score[opposing_player]--;
+            j_it -= 1;
+        }
+    }
+
+    // Capture RIGHT path
+    if ( playable_direction[i][j][4] )
+    {
+        i_it = i, j_it = j+1;
+        while ( board[i_it][j_it] == opposing_player )
+        {
+            board[i_it][j_it] = current_player;
+            score[current_player]++;
+            score[opposing_player]--;
+            j_it += 1;
+        }
+    }
+
+    // Capture DL diagonal
+    if ( playable_direction[i][j][5] )
+    {
+        i_it = i+1, j_it = j-1;
+        while ( board[i_it][j_it] == opposing_player )
+        {
+            board[i_it][j_it] = current_player;
+            score[current_player]++;
+            score[opposing_player]--;
+            i_it += 1;
+            j_it -= 1;
+        }
+    }
+
+    // Capture DOWN path
+    if ( playable_direction[i][j][6] )
+    {
+        i_it = i+1, j_it = j;
+        while ( board[i_it][j_it] == opposing_player )
+        {
+            board[i_it][j_it] = current_player;
+            score[current_player]++;
+            score[opposing_player]--;
+            i_it += 1;
+        }
+    }
+
+    // Capture DR diagonal
+    if ( playable_direction[i][j][7] )
+    {
+        i_it = i+1, j_it = j+1;
+        while ( board[i_it][j_it] == opposing_player )
+        {
+            board[i_it][j_it] = current_player;
+            score[current_player]++;
+            score[opposing_player]--;
+            i_it += 1;
+            j_it += 1;
+        }
+    }
+}
+
+void render_score()
+{
+    DrawText(TextFormat("BLACK PLAYER\nScore: %i", score[BLACK_PLAYER]), 50, 100, 60, BLACK);
+    DrawText(TextFormat("WHITE PLAYER\nScore: %i", score[WHITE_PLAYER]), 2350, 100, 60, WHITE);
+    //DrawText(TextFormat("Cordenada x: %i", position.x), 350, 100, 50, BLACK);
+    //DrawText(TextFormat("Cordenada y: %i", position.y), 350, 150, 50, BLACK);
 }
