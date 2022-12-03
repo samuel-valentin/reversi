@@ -17,6 +17,7 @@ int current_player = BLACK_PLAYER;
 bool test = false;
 int wrong_move = FALSE;
 int has_valid_move = FALSE;
+int skipp_turn = FALSE;
 
 
 struct Position
@@ -37,9 +38,8 @@ void init_game()
     board[4][4] = BLACK_PLAYER;
     board[3][4] = WHITE_PLAYER;
     board[4][3] = WHITE_PLAYER;
-    score[WHITE_PLAYER] = 2;
-    score[BLACK_PLAYER] = 2;
-                                  //Linea quitada de prueba
+    score[WHITE_PLAYER] = 2;    //2
+    score[BLACK_PLAYER] = 2;    //2
 }
 
 void render_board()
@@ -228,8 +228,8 @@ void make_next_move()
         test = false;
         position.x = -1;
         position.y = -1;
-    } else
-        wrong_move = TRUE;
+    } /*else
+        wrong_move = TRUE;*/
 }
 
 char get_mouse_position ()
@@ -241,16 +241,12 @@ char get_mouse_position ()
         for (int i = x; i < cellLength * 8 + x; i += cellLength) {
             if (GetMouseX() >= i  && GetMouseX() <= i + cellLength) {
                 position.x = (i / cellLength) - 3;
-                //position.x = GetMouseX() / i * cellLength + boardX;
-                //position.x = 0;
                 break;
             }
         }
         for (int i = y; i < cellLength * 8 + y; i += cellLength) {
             if (GetMouseY() >= i && GetMouseY() <= i + cellLength) {
                 position.y = i / cellLength;
-                //position.y = GetMouseY() / i * cellLength + boardY;
-                //position.y = 0;
                 break;
             }
         }
@@ -399,6 +395,35 @@ void render_score()
 {
     DrawText(TextFormat("BLACK PLAYER\nScore: %i", score[BLACK_PLAYER]), 50, 100, 60, BLACK);
     DrawText(TextFormat("WHITE PLAYER\nScore: %i", score[WHITE_PLAYER]), 2350, 100, 60, WHITE);
-    //DrawText(TextFormat("Cordenada x: %i", position.x), 350, 100, 50, BLACK);
-    //DrawText(TextFormat("Cordenada y: %i", position.y), 350, 150, 50, BLACK);
+}
+
+int game_ended()
+{
+    if (board_full())
+        return TRUE;
+    if (!has_valid_move)
+        return TRUE;
+    return FALSE;
+}
+
+int board_full()
+{
+    if ((score[BLACK_PLAYER] + score[WHITE_PLAYER]) == 64)
+        return TRUE;
+    return FALSE;
+}
+
+void render_end_of_the_game()
+{
+    render_pieces();
+    score[current_player]++;
+    DrawText(TextFormat("BLACK PLAYER\nScore: %i", score[BLACK_PLAYER]), 50, 100, 60, BLACK);
+    DrawText(TextFormat("WHITE PLAYER\nScore: %i", score[WHITE_PLAYER]), 2350, 100, 60, WHITE);
+    DrawText("Game Over",715,750,300,RED);
+    DrawText("For New Game press Space Bar",1010,1550,60,MAROON);
+    DrawText("For Exit to the Game press Esc",1010,1610,60,MAROON);
+    if (score[BLACK_PLAYER] > score[WHITE_PLAYER])
+        DrawText("Winner!\nCongrats!", 50, 400, 100, BLACK);
+    else
+    DrawText("Winner!\nCongrats!", 2350, 400, 100, WHITE);
 }

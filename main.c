@@ -2,8 +2,6 @@
 #include "container.h"
 #include <string.h>
 
-int game_ended = 0;
-
 
 int main()
 {
@@ -17,20 +15,29 @@ int main()
     init_game();
     while(!WindowShouldClose())
     {
+        bool pause = true;
         BeginDrawing();
         ClearBackground(LIGHTGRAY);
         render_board();  //
         render_pieces();
+        render_score();
         mark_playable_positions();
         make_next_move();
-        render_score();
-        EndDrawing();
-
-        if (game_ended){
-            DrawText("Game Over",900,500,100,RED);
+        if (game_ended()){
+            //pause = true;
+            while(pause){                                      ////Algo aqui esta mal, no se reinicia cuando deberia, pero si termina cuando no
+                if (IsKeyPressed(KEY_SPACE)){
+                    pause = false;
+                    init_game();
+                    return 0;
+                }
+                if (IsKeyPressed(KEY_ESCAPE))
+                    CloseWindow();
+                render_end_of_the_game();
+                EndDrawing();
+            }
         }
-
-
+        EndDrawing();
     }
 
     CloseWindow();

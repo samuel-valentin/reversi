@@ -23,4 +23,7 @@ void change_current_player ();
 void mark_playable_positions( );
 void capture_pieces( int i, int j );
 void render_score();
+int game_ended();
+int board_full();
+void render_end_of_the_game();
 #endif //REVERSI_CONTAINER_H
