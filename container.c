@@ -18,6 +18,7 @@ bool test = false;
 int wrong_move = FALSE;
 int has_valid_move = FALSE;
 int skipp_turn = FALSE;
+int movements [2];
 
 
 struct Position
@@ -25,6 +26,44 @@ struct Position
     int x;
     int y;
 }position;
+
+struct node
+{
+    int value_of_board;
+    struct node *next;
+    struct node *after;
+};
+
+struct stack
+{
+    Node *head;
+};
+
+Stack *stack_new()
+{
+    Stack *new = malloc(sizeof(Stack));
+    new->head = NULL;
+    return new;
+}
+
+Node *new_node(int value)
+{
+    Node *new = malloc(sizeof(Node));
+    new->value_of_board = value;
+    new->next = NULL;
+    return new;
+}
+
+void add_board(Stack *s, int value) //agrego int en la matriz el profe agrega char
+{
+    if(s->head == NULL){
+        s->head = new_node(value);
+        return;
+    }
+    Node *new_head = new_node(value);
+    new_head->next = s->head;
+    s->head = new_head;
+}
 
 //Inicializacio del tablero
 void init_game()
@@ -40,6 +79,8 @@ void init_game()
     board[4][3] = WHITE_PLAYER;
     score[WHITE_PLAYER] = 2;    //2
     score[BLACK_PLAYER] = 2;    //2
+    movements[WHITE_PLAYER] = 0;
+    movements[BLACK_PLAYER] = 0;
 }
 
 void render_board()
@@ -75,7 +116,7 @@ void render_pieces()
                 DrawCircleGradient(i*cellLength+x,j*cellLength+y, 60, GRAY, DARKGRAY);
         }
     }
-
+    render_score();
 }
 
 void render_possible_moves()
@@ -218,18 +259,25 @@ int distance( int i1, int j1, int i2, int j2 )
 
 void make_next_move()
 {
+    Stack *s = stack_new();
     get_mouse_position();
     if (is_valid_position(position.x,position.y) && board [position.x][position.y] == PLAYABLE){
+        score[current_player]++;                                          ////Has quitado esta linea para el score
         board [position.x][position.y] = current_player;
-        score[current_player]++;
         capture_pieces( position.x, position.y);
+        render_score();
         if (test)
             change_current_player();
         test = false;
         position.x = -1;
         position.y = -1;
-    } /*else
-        wrong_move = TRUE;*/
+        movements [current_player]++;
+    }
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j <8; ++j) {
+            add_board(s, board[i][j]);
+        }
+    }
 }
 
 char get_mouse_position ()
@@ -389,6 +437,7 @@ void capture_pieces( int i, int j )
             j_it += 1;
         }
     }
+    render_score();
 }
 
 void render_score()
@@ -399,11 +448,17 @@ void render_score()
 
 int game_ended()
 {
-    if (board_full())
+    /*if (board_full())
         return TRUE;
     if (!has_valid_move)
-        return TRUE;
-    return FALSE;
+        return TRUE;*/
+    for (int i = 0; i <8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            if (board[i][j] == PLAYABLE)
+                return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 int board_full()
@@ -416,9 +471,7 @@ int board_full()
 void render_end_of_the_game()
 {
     render_pieces();
-    score[current_player]++;
-    DrawText(TextFormat("BLACK PLAYER\nScore: %i", score[BLACK_PLAYER]), 50, 100, 60, BLACK);
-    DrawText(TextFormat("WHITE PLAYER\nScore: %i", score[WHITE_PLAYER]), 2350, 100, 60, WHITE);
+    render_score();
     DrawText("Game Over",715,750,300,RED);
     DrawText("For New Game press Space Bar",1010,1550,60,MAROON);
     DrawText("For Exit to the Game press Esc",1010,1610,60,MAROON);
@@ -426,4 +479,27 @@ void render_end_of_the_game()
         DrawText("Winner!\nCongrats!", 50, 400, 100, BLACK);
     else
     DrawText("Winner!\nCongrats!", 2350, 400, 100, WHITE);
+}
+
+int check_undo_game()
+{
+    if (movements[current_player] < 1)
+        return TRUE;
+    return FALSE;
+}
+
+void undo_game()
+{
+    Stack *s;
+    while (s->head == NULL)
+        printf("%c\n",pop_board(s));
+}
+
+int pop_board(Stack *s)
+{
+    int to_return = s->head->value_of_board;
+    Node *to_free = s->head;
+    s->head = s->head->next;
+    free(to_free);
+    return to_return;
 }

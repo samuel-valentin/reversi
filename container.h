@@ -10,6 +10,12 @@
 #include <stdio.h>
 #include <string.h>
 
+typedef struct node Node;
+typedef struct stack Stack;
+
+Stack *stack_new();
+//void add_board(Stack *s, int *value);
+int pop_board(Stack *s);
 void init_game();
 void render_board();
 void render_pieces();
@@ -26,4 +32,7 @@ void render_score();
 int game_ended();
 int board_full();
 void render_end_of_the_game();
+void undo_game();
+int check_undo_game();
+
 #endif //REVERSI_CONTAINER_H
