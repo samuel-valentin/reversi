@@ -11,15 +11,18 @@
 #define TRUE         1
 
 char board[8][8];
+char boar_of_boards[8][8][1000];
 int playable_direction [8][8][8];
 int score [2];
+int score_of_scores[2][1000];
 int current_player = BLACK_PLAYER;
 bool test = false;
 int wrong_move = FALSE;
 int has_valid_move = FALSE;
 int skipp_turn = FALSE;
 int movements [2];
-
+int c,upper_game;
+bool check_upper_game;
 
 struct Position
 {
@@ -54,7 +57,7 @@ Node *new_node(int value)
     return new;
 }
 
-void add_board(Stack *s, int value) //agrego int en la matriz el profe agrega char
+void add_board(Stack *s, int value)
 {
     if(s->head == NULL){
         s->head = new_node(value);
@@ -63,6 +66,15 @@ void add_board(Stack *s, int value) //agrego int en la matriz el profe agrega ch
     Node *new_head = new_node(value);
     new_head->next = s->head;
     s->head = new_head;
+}
+
+int pop_board(Stack *s)
+{
+    int to_return = s->head->value_of_board;
+    Node *to_free = s->head;
+    s->head = s->head->next;
+    free(to_free);
+    return to_return;
 }
 
 //Inicializacio del tablero
@@ -81,6 +93,8 @@ void init_game()
     score[BLACK_PLAYER] = 2;    //2
     movements[WHITE_PLAYER] = 0;
     movements[BLACK_PLAYER] = 0;
+    c = 0, upper_game = 0;
+    check_upper_game = false;
 }
 
 void render_board()
@@ -259,13 +273,22 @@ int distance( int i1, int j1, int i2, int j2 )
 
 void make_next_move()
 {
-    Stack *s = stack_new();
+    //Stack *s = stack_new();
     get_mouse_position();
     if (is_valid_position(position.x,position.y) && board [position.x][position.y] == PLAYABLE){
+        printf("jugada:[%i] ",c);
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                boar_of_boards[i][j][c] = board [i][j];
+            }
+        }
+        score_of_scores [WHITE_PLAYER][c] = score [WHITE_PLAYER];
+        score_of_scores [BLACK_PLAYER][c] = score [BLACK_PLAYER];
+        upper_game++;
+        c++;
         score[current_player]++;                                          ////Has quitado esta linea para el score
         board [position.x][position.y] = current_player;
         capture_pieces( position.x, position.y);
-        render_score();
         if (test)
             change_current_player();
         test = false;
@@ -273,11 +296,11 @@ void make_next_move()
         position.y = -1;
         movements [current_player]++;
     }
-    for (int i = 0; i < 8; ++i) {
+    /*for (int i = 0; i < 8; ++i) {
         for (int j = 0; j <8; ++j) {
             add_board(s, board[i][j]);
         }
-    }
+    }*/
 }
 
 char get_mouse_position ()
@@ -305,24 +328,6 @@ char get_mouse_position ()
 void change_current_player( )
 {
     current_player = (current_player + 1 ) % 2;
-}
-
-void mark_playable_positions( )
-{
-    has_valid_move = FALSE;
-    for ( int i=0; i<8; ++i )
-    {
-        for ( int j=0; j<8; ++j )
-        {
-            if ( board[i][j] == PLAYABLE )
-                board[i][j] = EMPTY;
-            if ( is_playable( i, j ) )
-            {
-                board[i][j] = PLAYABLE;
-                has_valid_move = TRUE;
-            }
-        }
-    }
 }
 
 void capture_pieces( int i, int j )
@@ -483,23 +488,46 @@ void render_end_of_the_game()
 
 int check_undo_game()
 {
-    if (movements[current_player] < 1)
+    if ( c == 0 )
         return TRUE;
     return FALSE;
 }
 
 void undo_game()
 {
-    Stack *s;
+    --c;
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            board[i][j] = boar_of_boards[i][j][c];
+        }
+    }
+    score[WHITE_PLAYER] = score_of_scores[WHITE_PLAYER][c];
+    score[BLACK_PLAYER] = score_of_scores[BLACK_PLAYER][c];
+    change_current_player();
+    check_upper_game = true;
+    /*Stack *s;
     while (s->head == NULL)
-        printf("%c\n",pop_board(s));
+        printf("%c\n",pop_board(s));*/
 }
 
-int pop_board(Stack *s)
+void redo_game()
 {
-    int to_return = s->head->value_of_board;
-    Node *to_free = s->head;
-    s->head = s->head->next;
-    free(to_free);
-    return to_return;
+    ++c;
+    if (c == upper_game)
+        c--;
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            board[i][j] = boar_of_boards[i][j][c];
+        }
+    }
+    score[WHITE_PLAYER] = score_of_scores[WHITE_PLAYER][c];
+    score[BLACK_PLAYER] = score_of_scores[BLACK_PLAYER][c];
+    change_current_player();
+}
+
+int check_redo_game()
+{
+    if (check_upper_game == false)
+        return TRUE;
+    return FALSE;
 }

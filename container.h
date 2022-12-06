@@ -33,6 +33,8 @@ int game_ended();
 int board_full();
 void render_end_of_the_game();
 void undo_game();
+void redo_game();
 int check_undo_game();
+int check_redo_game();
 
 #endif //REVERSI_CONTAINER_H
